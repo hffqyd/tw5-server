@@ -4,7 +4,9 @@ A local server for TiddlyWiki5 that saves and backups wikis, inspired by [tw5-se
 
 tw5-server is written in Python, provides features of:
 
-Backup wiki in compress format (.gz).
+- Server for TiddlyWiki5, as well as other files (e.g. images used in TW5);
+- Easy to save wiki via browsers;
+- Backup wiki in compress format (.gz), to save disk space;
 
 # Usage
 
