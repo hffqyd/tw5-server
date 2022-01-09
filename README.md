@@ -9,12 +9,14 @@ Backup wiki in compress format (.gz).
 # Usage
 
 ```bash
-python script.py -p 8000 -d ./ -b tmp
+python tw5-server.py -p 8000 -d ./ -b tmp
 
 -p port, default 8000
 -d directory to servering, default `current dir`
 -b backup directory name, default `tmp`
 ```
+
+In Unix/Linux, just excute `./tw5-server.py` (with `chmod +x tw5-server.py`).
 
 # Plans
 
