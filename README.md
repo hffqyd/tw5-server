@@ -13,12 +13,15 @@ tw5-server is written in Python, provides features of:
 ```bash
 python tw5-server.py -p 8000 -d ./ -b tmp
 
+-a address, defautl localhost
 -p port, default 8000
 -d directory to servering, default `current dir`
 -b backup directory name, default `tmp`
 ```
 
 In Unix/Linux, just excute `./tw5-server.py` (with `chmod +x tw5-server.py`).
+
+Then go to http://localhost:8000 (or other address:port specified in command) in your web browser, and click on your wiki html file.
 
 # Plans
 
