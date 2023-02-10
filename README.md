@@ -18,7 +18,7 @@ python tw5-server.py -p 8000 -d ./ -b tmp
 -a address, defautl localhost
 -p port, default 8000
 -d directory to servering, default `current dir`
--b backup directory name, default `tmp`
+-b backup directory name, default `backup`
 
 Backups auto-clean strategy:
 Keep all backups in current month, keep only the newest one for previous months.
