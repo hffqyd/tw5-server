@@ -5,14 +5,19 @@ import getopt
 import os
 import datetime
 import gzip
+import glob
 
 usage = """
 python tw5-server.py -a localhost -p 8000 -d ./ -b backup
 
+-h usage help
 -a address, defautl localhost
 -p port, default 8000
 -d directory to servering, default `current dir`
 -b backup directory name, default `backup`
+
+Backups auto-clean strategy: 
+Keep all backups in current month, keep only the newest one for previous months.
 """
 
 addr = "localhost"
@@ -85,6 +90,45 @@ class TWiki5(SimpleHTTPRequestHandler):
         self.send_header("x-api-access-type", "file")
         self.end_headers()
 
+def old_backups(path, name):
+    now = time_now()
+    c_year_month = now[:6]
+
+    backup_name = os.path.join(path, name)
+    all_backup = glob.glob(backup_name + '*.html.gz')
+    all_backup = sorted(all_backup, reverse=True)
+
+    to_be_removed = []
+    saved_y_m = ''
+    for i in all_backup:
+        date = i[-22:]
+        y_m = date[:6]
+        if y_m >= c_year_month:
+            continue
+
+        if saved_y_m == y_m:
+            to_be_removed.append(i)
+        else:
+            saved_y_m = y_m
+
+    return to_be_removed
+
+def clean_backup(path):
+    names = set()
+    all_backups = glob.glob(os.path.join(path, '*.html.gz'))
+    for i in all_backups:
+        name = os.path.split(i)[1]
+        name = name[:-23]
+        names.add(name)
+
+    count = 0
+    for i in names:
+        for old in old_backups(path, i):
+            os.remove(old)
+            print('Removing', old)
+            count += 1
+    return count
+
 if __name__ == "__main__":
     server = (addr, port)
     print(f"Servering at {addr}:{port}")
@@ -93,5 +137,15 @@ if __name__ == "__main__":
     try:
         HTTPServer(server, TWiki5).serve_forever()
     except KeyboardInterrupt:
-        print("\rBye~")
+        clean = input('\rClean backups (y to clean): ')
+
+        cleaned = 0
+        if 'y' == clean:
+            cleaned = clean_backup(backup)
+
+        if cleaned > 0:
+            print(cleaned, 'backup(s) cleaned. Bye ~')
+        else:
+            print('No backups were cleaned. Bye ~')
+
         sys.exit()
