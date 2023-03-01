@@ -30,5 +30,5 @@ Then go to http://localhost:8000 (or other address:port specified in command) in
 
 # Plans
 
-- [x] Upload images/files (e.g. to images directory) for use within TiddlyWiki5 (e.g. [img[images/some.png]])
+- [x] Upload images/files (e.g. to images directory) for use within TiddlyWiki5 (e.g. [img[images/some.png]]): Browse a file, check if override and submit, saving message will be on the right.
     ![Upload screenshot](upload.png)
