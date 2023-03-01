@@ -30,4 +30,5 @@ Then go to http://localhost:8000 (or other address:port specified in command) in
 
 # Plans
 
-- [ ] Upload images/files (e.g. to images directory) for use within TiddlyWiki5 (e.g. [img[images/some.png]])
+- [x] Upload images/files (e.g. to images directory) for use within TiddlyWiki5 (e.g. [img[images/some.png]])
+    ![Upload screenshot](upload.png)
