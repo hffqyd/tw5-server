@@ -113,7 +113,7 @@ proc sendDirContents(settings: NimHttpSettings, dir: string): NimHttpResponse =
   let subtitle = path.relativePath(cwd)
   for i in walkDir(path):
     let name = i.path.extractFilename
-    let relpath = i.path.relativePath(cwd)
+    let relpath = i.path.relativePath(path).strip(chars = {'/'}, trailing = false)
     if name == "index.html" or name == "index.htm":
       return sendStaticFile(settings, i.path)
     if i.path.dirExists:
@@ -136,7 +136,7 @@ proc logmsg(msg: string, log: bool) =
   if log:
     echo msg
 
-proc getPut(req: Request, path, backup: string, log: bool): NimHttpResponse = 
+proc getPut(req: Request, path, backup: string, log: bool): NimHttpResponse =
   let content = req.body
   writeFile(path, content)
   logmsg("Update: " & path, log)
@@ -171,7 +171,7 @@ proc savePost(req: Request, path, url_path: string, log: bool): NimHttpResponse 
 
     writeFile(path / newName, file_body)
     let
-      rsp_msg = "Save file to " & newName 
+      rsp_msg = "Save file to " & newName
       msg = rsp_msg & " in " & path
     rsp_content = rsp_msg
     code = Http200
@@ -314,7 +314,7 @@ echo("  Backup dir: ", backup)
 proc handleCtrlC() {.noconv.} =
   write(stdout, "\rClean backups (y to clean): ")
   let clean = readLine(stdin)
-  
+
   var cleaned = 0
   if "y" == clean:
     cleaned = clean_backup(dir, backup)
