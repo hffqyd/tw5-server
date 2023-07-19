@@ -2,7 +2,7 @@
 
 A local server for TiddlyWiki5 that saves and backups wikis, inspired by [tw5-server.rb](https://gist.github.com/jimfoltz/ee791c1bdd30ce137bc23cce826096da).
 
-tw5-server is written in Nim/Python, provides features of:
+tw5-server is written in Nim, provides features of:
 
 - Server for TiddlyWiki5, as well as other files (e.g. images used in TW5 `[img[images/*.png]]`).
 - Easy to save wiki via browsers.
@@ -12,13 +12,9 @@ tw5-server is written in Nim/Python, provides features of:
 
 # Usage
 
-Download binary executable for your OS (recommanded), or python script (less recommanded, as python version is somewhat falling behind) from [github release](https://github.com/hffqyd/tw5-server/releases), and run in your terminal.
+Download binary executable for your OS from [github release](https://github.com/hffqyd/tw5-server/releases), and run in your terminal.
 
 ```bash
-# python script:
-python tw5-server.py -p 8000 -d ./ -b backup_dir
-
-# binary file:
 tw5server -a:192.168.0.10 -p:8000 -d:./ -b:backup
 
 -h usage help
