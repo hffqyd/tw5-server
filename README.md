@@ -6,6 +6,7 @@ tw5-server is written in Nim, provides features of:
 
 - Server for TiddlyWiki5, as well as other files (e.g. images used in TW5 `[img[images/*.png]]`).
 - Easy to save wiki via browsers.
+- Upload images/files for using in TiddlyWiki5 via press button or drag-and-drop.
 - Backup wiki in compress format (.gz), to save disk space.
 - Auto clean backups: keep one newest per previous month, keep all backups in current month.
 - Offer binary executable for Linux, macos and windows.
@@ -32,6 +33,10 @@ Then go to http://localhost:8000 (or other address:port specified in command) in
 
 # Upload example
 
-Upload images/files (e.g. to images directory) for use within TiddlyWiki5 (e.g. [img[images/some.png]]): Browse a file, check if override and submit, saving message will be on the right.
+1. Upload images/files (e.g. to images directory) for use within TiddlyWiki5 (e.g. [img[images/some.png]]): Browse a file, check if override and submit, saving message will be on the right.
 
 ![Upload screenshot](upload.png)
+
+2. Upload images/files via drag-and-drop: Drag a file to tw5-server page (the background will change during draging), and drop.
+
+![Drag-and-drop](drag-drop.png)
