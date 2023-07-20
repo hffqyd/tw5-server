@@ -9,11 +9,11 @@ tw5-server is written in Nim, provides features of:
 - Upload images/files for using in TiddlyWiki5 via press button or drag-and-drop.
 - Backup wiki in compress format (.gz), to save disk space.
 - Auto clean backups: keep one newest per previous month, keep all backups in current month.
-- Offer binary executable for Linux, macos and windows.
+- Offer binary executable for Linux, macos, Android and windows.
 
 # Usage
 
-Download binary executable for your OS from [github release](https://github.com/hffqyd/tw5-server/releases), and run in your terminal.
+Download binary executable for your OS from [github release](https://github.com/hffqyd/tw5-server/releases), and run in your terminal (in Termux if using Android).
 
 ```bash
 tw5server -a:192.168.0.10 -p:8000 -d:./ -b:backup
