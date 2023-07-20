@@ -9,14 +9,20 @@
   </head>
   <body>
     <h1>$1</h1>
-    <h2>$3</h2>
-    <iframe id="nojump" name="nojump" frameborder="0" seamless></iframe>
+    <div id="nojump" name="nojump" frameborder="0"></div>
     <form method="post" enctype="multipart/form-data" target="nojump">
-	<input type="file" name="file" value="file">
-	Override: <input type="checkbox" name="write" value="yes">
-	<input type="submit" name="submit" value="Submit">
+	<input id="upload_button" type="file" name="file" value="file">
+	<label class="button-primary" for="upload_button" id="upload_button2">Browse</label>
+	<label for="override_check">
+	<input type="checkbox" name="override" value="yes" id="override_check">Override
+	</label>
+	<label class="button-primary button-success" type="submit">Upload</label>
 	</form>
+    <h2>$3</h2>
     $4
     $5
+  <script>
+    $6
+  </script>
   </body>
 </html>

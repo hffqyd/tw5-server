@@ -13,17 +13,16 @@ import
   mimetypes
 
 import tables, strtabs
-from jester/private/utils import parseMPFD
-
-type MultiData* = OrderedTable[string, tuple[fields: StringTableRef, body: string]]
-
 from httpcore import HttpMethod, HttpHeaders
+
+from parseBody import parseMPFD
 
 const
   name = "TW5 server"
-  version = "1.0.0"
+  version = "1.2.0"
   style = staticRead("style.css")
   temp = staticRead("template.html")
+  js = staticRead("main.js")
 
 const usage = """
 tw5server -a:localhost -p:8000 -d:dir -b:backup
@@ -61,7 +60,7 @@ type
 # TODO: update web page after upload
 proc h_page(settings:NimHttpSettings, content, title, subtitle: string): string =
   var footer = """<div id="footer">$1 v$2</div>""" % [settings.name, settings.version]
-  result = temp % [title, style, subtitle, content, footer]
+  result = temp % [title, style, subtitle, content, footer, js]
 
 proc relativePath(path, cwd: string): string =
   var path2 = path
@@ -158,7 +157,7 @@ proc savePost(req: Request, path, url_path: string, log: bool): NimHttpResponse 
     file = body["file"]
     filename = file.fields["filename"]
     file_body = file.body
-    override = body.getOrDefault("write").body
+    override = body.getOrDefault("override").body
 
   var
     rsp_content = ""
@@ -173,7 +172,7 @@ proc savePost(req: Request, path, url_path: string, log: bool): NimHttpResponse 
     let
       rsp_msg = "Save file to " & newName
       msg = rsp_msg & " in " & path
-    rsp_content = rsp_msg
+    rsp_content = newName
     code = Http200
     logmsg(msg, log)
   else:
@@ -181,7 +180,7 @@ proc savePost(req: Request, path, url_path: string, log: bool): NimHttpResponse 
     let
       rsp_msg = "Save file to " & filename
       msg = rsp_msg & " in " & path
-    rsp_content = rsp_msg
+    rsp_content = filename
     code = Http200
     logmsg(msg, log)
   return (code: code, content: rsp_content, headers: {"status": "ok"}.newHttpHeaders())
@@ -310,6 +309,8 @@ settings.port = Port(port)
 echo(" Serving url: ", address, ":", port)
 echo("Serving path: ", dir)
 echo("  Backup dir: ", backup)
+
+createDir(dir / backup)
 
 proc handleCtrlC() {.noconv.} =
   write(stdout, "\rClean backups (y to clean): ")
