@@ -19,7 +19,7 @@ from parseBody import parseMPFD
 
 const
   name = "TW5 server"
-  version = "1.2.0"
+  version = "1.2.2"
   style = staticRead("style.css")
   temp = staticRead("template.html")
   js = staticRead("main.js")
@@ -33,6 +33,7 @@ tw5server -a:localhost -p:8000 -d:dir -b:backup
 -d directory to servering, default `current dir`
 -b backup directory name, default `backup`
 -l show log message
+-m max size of uploaded file (MB), default 100
 
 Backups auto-clean strategy:
 Keep all backups in current month, keep only the newest one for previous months.
@@ -157,13 +158,13 @@ proc savePost(req: Request, path, url_path: string, log: bool): NimHttpResponse 
     file = body["file"]
     filename = file.fields["filename"]
     file_body = file.body
-    override = body.getOrDefault("override").body
+    overwrite = body.getOrDefault("overwrite").body
 
   var
     rsp_content = ""
     code = Http400
 
-  if fileExists(path / filename) and "yes" != override:
+  if fileExists(path / filename) and "yes" != overwrite:
     let
       (_, base, ext) = filename.splitFile()
       newName = base & "-" & time_now() & ext
@@ -185,8 +186,8 @@ proc savePost(req: Request, path, url_path: string, log: bool): NimHttpResponse 
     logmsg(msg, log)
   return (code: code, content: rsp_content, headers: {"status": "ok"}.newHttpHeaders())
 
-proc serve(settings: NimHttpSettings, backup: string, log: bool) =
-  var server = newAsyncHttpServer()
+proc serve(settings: NimHttpSettings, backup: string, log: bool, maxbody: int) =
+  var server = newAsyncHttpServer(maxBody = maxbody)
   proc handleHttpRequest(req: Request): Future[void] {.async.} =
     let
       url_path = req.url.path.replace("%20", " ").decodeUrl()
@@ -273,6 +274,7 @@ var
   backup = "backup"
   title = "TW5 server"
   log = false
+  maxbody = 100 # max body length (MB)
 
 for kind, key, val in parseopt.getopt():
   case kind
@@ -293,6 +295,8 @@ for kind, key, val in parseopt.getopt():
       backup = val
     of "l", "log":
       log = true
+    of "m", "max":
+      maxbody = parseInt(val)
   else:
     assert(false)
 
@@ -329,5 +333,5 @@ proc handleCtrlC() {.noconv.} =
 
 setControlCHook(handleCtrlC)
 
-serve(settings, backup, log)
+serve(settings, backup, log, maxbody = maxbody * 1024 * 1024)
 runForever()
