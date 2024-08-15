@@ -19,7 +19,7 @@ from parseBody import parseMPFD
 
 const
   name = "TW5 server"
-  version = "1.2.2"
+  version = "1.2.3"
   style = staticRead("style.css")
   temp = staticRead("template.html")
   js = staticRead("main.js")
@@ -65,10 +65,15 @@ proc h_page(settings:NimHttpSettings, content, title, subtitle: string): string 
 
 proc relativePath(path, cwd: string): string =
   var path2 = path
-  if cwd == "/":
-    return path
+  var wd = cwd
+  if wd.endsWith("/"):
+    wd.removeSuffix("/")
+  if wd == "/":
+    return wd
+  elif wd == path2:
+    return "/"
   else:
-    path2.delete(0..cwd.len-1)
+    path2.removePrefix(wd)
   var relpath = path2.replace("\\", "/")
   if (not relpath.endsWith("/")) and (not path.fileExists):
     relpath = relpath&"/"
