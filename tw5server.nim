@@ -12,6 +12,7 @@ import
   zippy,
   mimetypes
 
+import strformat
 import tables, strtabs
 from httpcore import HttpMethod, HttpHeaders
 
@@ -19,19 +20,22 @@ from parseBody import parseMPFD
 
 const
   name = "TW5 server"
-  version = "1.2.3"
+  version = "1.2.4"
   style = staticRead("style.css")
   temp = staticRead("template.html")
   js = staticRead("main.js")
 
-const usage = """
+const usage = fmt"""
+{name} {version}
+
+Usage:
 tw5server -a:localhost -p:8000 -d:dir -b:backup
 
--h usage help
+-h this help
 -a address, defautl "127.0.0.1"
 -p port, default 8000
--d directory to servering, default `current dir`
--b backup directory name, default `backup`
+-d directory to serve, default `current dir`
+-b backup directory, default `backup` in serve dir. `backup/` or `backup\\` for a backup path.
 -l show log message
 -m max size of uploaded file (MB), default 100
 
@@ -147,7 +151,7 @@ proc getPut(req: Request, path, backup: string, log: bool): NimHttpResponse =
   logmsg("Update: " & path, log)
 
   let (dir, name, _) = splitFile(path)
-  let backup_name = dir / backup / name & "-" & time_now() & ".html.gz"
+  let backup_name = backup / name & "-" & time_now() & ".html.gz"
 
   let compressed = compress(content, BestCompression)
   writeFile(backup_name, compressed)
@@ -255,9 +259,9 @@ proc backupFileName(name: string): string =
   # backup name: name-timestamp.html.gz, e.g, test-20230227142037.html.gz
   return name[0..^21]
 
-proc clean_backup(dir, backup: string): int =
+proc clean_backup(backup: string): int =
   var names: HashSet[string]
-  let all_backups = toSeq(walkPattern(dir / backup / "*.html.gz"))
+  let all_backups = toSeq(walkPattern(backup / "*.html.gz"))
 
   for i in all_backups:
     let (_, name, _) = splitFile(i)
@@ -265,7 +269,7 @@ proc clean_backup(dir, backup: string): int =
 
   var count = 0
   for i in names:
-    for old in old_backups(dir / backup, i):
+    for old in old_backups(backup, i):
       removeFile(old)
       count += 1
 
@@ -302,6 +306,9 @@ for kind, key, val in parseopt.getopt():
       log = true
     of "m", "max":
       maxbody = parseInt(val)
+    of "v", "version":
+      echo version
+      quit()
   else:
     assert(false)
 
@@ -317,9 +324,12 @@ settings.port = Port(port)
 
 echo(" Serving url: ", address, ":", port)
 echo("Serving path: ", dir)
+
+if not ("/" in backup or "\\" in backup):
+  backup = dir / backup
 echo("  Backup dir: ", backup)
 
-createDir(dir / backup)
+createDir(backup)
 
 proc handleCtrlC() {.noconv.} =
   write(stdout, "\rClean backups (y to clean): ")
@@ -327,7 +337,7 @@ proc handleCtrlC() {.noconv.} =
 
   var cleaned = 0
   if "y" == clean:
-    cleaned = clean_backup(dir, backup)
+    cleaned = clean_backup(backup)
 
   if cleaned > 0:
     echo(cleaned, " backup(s) cleaned. Bye ~")
