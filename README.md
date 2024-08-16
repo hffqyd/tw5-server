@@ -16,14 +16,16 @@ tw5-server is written in Nim, provides features of:
 Download binary executable for your operating system from [github release](https://github.com/hffqyd/tw5-server/releases), and run in your terminal (in Termux or other terminals if using Android).
 
 ```bash
-tw5server -a:192.168.0.10 -p:8000 -d:./ -b:backup
+Usage:
+tw5server -a:localhost -p:8000 -d:dir -b:backup
 
--h usage help
--a address, defautl localhost
+-h this help
+-a address, defautl "127.0.0.1"
 -p port, default 8000
--d directory to servering, default `current dir`
--b backup directory name, default `backup`
--l log saving messages to stdout
+-d directory to serve, default `current dir`
+-b backup directory, default `backup` in serve dir. `backup/` or `backup\\` for a backup path.
+-l show log message
+-m max size of uploaded file (MB), default 100
 
 Backups auto-clean strategy:
 Keep all backups in current month, keep only the newest one for previous months.
