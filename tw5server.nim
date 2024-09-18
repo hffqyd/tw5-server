@@ -18,9 +18,11 @@ from httpcore import HttpMethod, HttpHeaders
 
 from parseBody import parseMPFD
 
+import json
+
 const
   name = "TW5 server"
-  version = "1.2.4"
+  version = "1.3.0"
   style = staticRead("style.css")
   temp = staticRead("template.html")
   js = staticRead("main.js")
@@ -32,6 +34,7 @@ Usage:
 tw5server -a:localhost -p:8000 -d:dir -b:backup
 
 -h this help
+-c config file, json format, default tw5server.json
 -a address, defautl "127.0.0.1"
 -p port, default 8000
 -d directory to serve, default `current dir`
@@ -275,7 +278,6 @@ proc clean_backup(backup: string): int =
 
   return count
 
-
 var
   port = 8000
   address = "127.0.0.1"
@@ -284,6 +286,8 @@ var
   title = "TW5 server"
   log = false
   maxbody = 100 # max body length (MB)
+  configFile = "tw5server.json"
+  configStr = "{}"
 
 for kind, key, val in parseopt.getopt():
   case kind
@@ -294,6 +298,8 @@ for kind, key, val in parseopt.getopt():
     of "h", "help":
       echo usage
       quit()
+    of "c":
+      configFile = val
     of "a", "address":
       address = val
     of "p", "port":
@@ -311,6 +317,17 @@ for kind, key, val in parseopt.getopt():
       quit()
   else:
     assert(false)
+
+if configFile.fileExists:
+  configStr = configFile.readFile
+
+let config = parseJson(configStr)
+
+dir = config{"server_path"}.getStr(dir)
+address = config{"address"}.getStr(address)
+port = config{"port"}.getInt(port)
+title = config{"title"}.getStr(title)
+backup = config{"backup"}.getStr(backup)
 
 var settings: NimHttpSettings
 settings.directory = dir
@@ -347,6 +364,9 @@ proc handleCtrlC() {.noconv.} =
   quit()
 
 setControlCHook(handleCtrlC)
+
+maxbody = config{"max_body"}.getInt(maxbody)
+log = config{"log"}.getBool(log)
 
 serve(settings, backup, log, maxbody = maxbody * 1024 * 1024)
 runForever()
