@@ -20,6 +20,7 @@ Usage:
 tw5server -a:localhost -p:8000 -d:dir -b:backup
 
 -h this help
+-c config file, json format, default tw5server.json
 -a address, defautl "127.0.0.1"
 -p port, default 8000
 -d directory to serve, default `current dir`

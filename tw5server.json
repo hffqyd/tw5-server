@@ -1,0 +1,9 @@
+{
+	"address": "127.0.0.1",
+	"port": 8000,
+	"server_path": "./",
+	"backup": "backup",
+	"title": "TW5 server",
+	"log": false,
+	"max_body": 100
+}
