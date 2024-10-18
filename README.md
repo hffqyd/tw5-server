@@ -27,6 +27,7 @@ tw5server -a:localhost -p:8000 -d:dir -b:backup
 -b backup directory, default `backup` in serve dir. `backup/` or `backup\\` for a backup path.
 -l show log message
 -m max size of uploaded file (MB), default 100
+--autoclean if auto clean backups
 
 Backups auto-clean strategy:
 Keep all backups in current month, keep only the newest one for previous months.
