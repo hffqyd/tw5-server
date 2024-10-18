@@ -22,7 +22,7 @@ import json
 
 const
   name = "TW5 server"
-  version = "1.3.0"
+  version = "1.5.0"
   style = staticRead("style.css")
   temp = staticRead("template.html")
   js = staticRead("main.js")
@@ -41,6 +41,7 @@ tw5server -a:localhost -p:8000 -d:dir -b:backup
 -b backup directory, default `backup` in serve dir. `backup/` or `backup\\` for a backup path.
 -l show log message
 -m max size of uploaded file (MB), default 100
+--autoclean if auto clean backups.
 
 Backups auto-clean strategy:
 Keep all backups in current month, keep only the newest one for previous months.
@@ -153,7 +154,7 @@ proc getPut(req: Request, path, backup: string, log: bool): NimHttpResponse =
   writeFile(path, content)
   logmsg("Update: " & path, log)
 
-  let (dir, name, _) = splitFile(path)
+  let (_, name, _) = splitFile(path)
   let backup_name = backup / name & "-" & time_now() & ".html.gz"
 
   let compressed = compress(content, BestCompression)
@@ -288,6 +289,7 @@ var
   maxbody = 100 # max body length (MB)
   configFile = "tw5server.json"
   configStr = "{}"
+  autoclean = false
 
 for kind, key, val in parseopt.getopt():
   case kind
@@ -308,6 +310,8 @@ for kind, key, val in parseopt.getopt():
       dir = val
     of "b", "backup":
       backup = val
+    of "autoclean":
+      autoclean = true
     of "l", "log":
       log = true
     of "m", "max":
@@ -328,6 +332,7 @@ address = config{"address"}.getStr(address)
 port = config{"port"}.getInt(port)
 title = config{"title"}.getStr(title)
 backup = config{"backup"}.getStr(backup)
+autoclean = config{"autoclean"}.getBool(autoclean)
 
 var settings: NimHttpSettings
 settings.directory = dir
@@ -348,22 +353,32 @@ echo("  Backup dir: ", backup)
 
 createDir(backup)
 
-proc handleCtrlC() {.noconv.} =
-  write(stdout, "\rClean backups (y to clean): ")
-  let clean = readLine(stdin)
-
+proc auto_clean_backup(folder: string) =
   var cleaned = 0
-  if "y" == clean:
-    cleaned = clean_backup(backup)
+  cleaned = clean_backup(folder)
 
   if cleaned > 0:
-    echo(cleaned, " backup(s) cleaned. Bye ~")
+    echo(cleaned, " backup(s) cleaned")
   else:
-    echo("No backups were cleaned. Bye ~")
+    echo("No backups were cleaned")
 
+proc handleCtrlC() {.noconv.} =
+  if autoclean:
+    auto_clean_backup(backup)
+  else:
+    write(stdout, "\rClean backups (y to clean): ")
+    let clean = readLine(stdin)
+    if "y" == clean:
+      auto_clean_backup(backup)
+
+  echo("Bye ~")
   quit()
 
-setControlCHook(handleCtrlC)
+if autoclean:
+  auto_clean_backup(backup)
+  setControlCHook(handleCtrlC)
+else:
+  setControlCHook(handleCtrlC)
 
 maxbody = config{"max_body"}.getInt(maxbody)
 log = config{"log"}.getBool(log)
