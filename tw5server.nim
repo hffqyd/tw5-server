@@ -113,6 +113,10 @@ proc sendStaticFile(settings: NimHttpSettings, path: string): NimHttpResponse =
   return (code: Http200, content: file, headers: {"Content-Type": mimetype}.newHttpHeaders)
 
 
+proc fileSort(a, b: tuple[kind: PathComponent, path: string]): int =
+  return cmpIgnoreCase(a.path, b.path)
+
+
 proc sendDirContents(settings: NimHttpSettings, dir: string): NimHttpResponse =
   let cwd = settings.directory.absolutePath
   var res: NimHttpResponse
@@ -124,7 +128,7 @@ proc sendDirContents(settings: NimHttpSettings, dir: string): NimHttpResponse =
     files.add """<li class="i-back entypo"><a href="$1">..</a></li>""" % [path.relativeParent(cwd)]
   var title = settings.title
   let subtitle = path.relativePath(cwd)
-  for i in walkDir(path):
+  for i in sorted(walkDir(path).toSeq, fileSort):
     let name = i.path.extractFilename
     let relpath = i.path.relativePath(path).strip(chars = {'/'}, trailing = false)
     if name == "index.html" or name == "index.htm":
