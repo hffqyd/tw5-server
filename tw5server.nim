@@ -9,6 +9,7 @@ import
   algorithm,
   sets,
   uri,
+  zip/zlib,
   zippy,
   mimetypes
 
@@ -22,7 +23,7 @@ import json
 
 const
   name = "TW5 server"
-  version = "1.5.0"
+  version = "1.5.2"
   style = staticRead("style.css")
   temp = staticRead("template.html")
   js = staticRead("main.js")
@@ -112,10 +113,8 @@ proc sendStaticFile(settings: NimHttpSettings, path: string): NimHttpResponse =
   var file = path.readFile
   return (code: Http200, content: file, headers: {"Content-Type": mimetype}.newHttpHeaders)
 
-
 proc fileSort(a, b: tuple[kind: PathComponent, path: string]): int =
   return cmpIgnoreCase(a.path, b.path)
-
 
 proc sendDirContents(settings: NimHttpSettings, dir: string): NimHttpResponse =
   let cwd = settings.directory.absolutePath
@@ -153,6 +152,12 @@ proc logmsg(msg: string, log: bool) =
   if log:
     echo msg
 
+proc zip(c: string): string =
+  when defined(macosx) and defined(arm64):
+    return zlib.compress(c, stream=GZIP_STREAM)
+  else:
+    return zippy.compress(c, BestCompression)
+
 proc getPut(req: Request, path, backup: string, log: bool): NimHttpResponse =
   let content = req.body
   writeFile(path, content)
@@ -161,7 +166,7 @@ proc getPut(req: Request, path, backup: string, log: bool): NimHttpResponse =
   let (_, name, _) = splitFile(path)
   let backup_name = backup / name & "-" & time_now() & ".html.gz"
 
-  let compressed = compress(content, BestCompression)
+  let compressed = zip(content)
   writeFile(backup_name, compressed)
   logmsg("Backup to: " & backup_name, log)
 
